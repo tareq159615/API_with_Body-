@@ -1,35 +1,36 @@
-const Product = require('./mongoose'); 
-// ---------------------------------------------Add Data----------------------------------------------
+const express = require("express");
+require("./config");
+const products = require("./product");
 
-const add_data_in_db = async () => {
-    let data = new Product({
-        name:'app 3',
-        price:340,
-        brand: "max", 
-        category:"mobile"
-    }); 
-    let result = await data.save(); 
-    console.log(result);
-}
-// add_data_in_db();
+const app = express();
+const PORT = 3000;
+app.use(express.json());
 
-// ---------------------------------------------------Mongodb data update----------------------------------------
-const update_data_in_db = async () => {
-    const data = await Product.updateOne({name:'app 3'},{$set:{price:450,name:'oppo'}}); 
-    console.log(data); 
-}
-// update_data_in_db(); 
+app.post("/create", async (req, res) => {
+  let data = new products(req.body);
+  let result = await data.save();
+  console.log(req.body);
+  res.send("Post your data");
+});
 
-// -------------------------------------------------Mongodb data delete------------------------------------------
-const delete_data_in_db = async () => {
-    const data = await Product.deleteOne({name:'oppo'}); 
-    console.log(data); 
-}
-// delete_data_in_db(); 
+app.get("/list", async (req, res) => {
+  let data = await products.find();
+  res.send(data);
+});
 
-// -------------------------------------------Read data------------------------------------------------
-const read_data_in_db = async () => {
-    const data = await Product.find(); 
-    console.log(data); 
-}
-// read_data_in_db(); 
+app.delete("/delete/:_id", async (req, res) => {
+  // console.log(req.params);
+  let data = await products.deleteOne(req.params);
+  res.send(data);
+});
+
+app.put("/update/:_id", async (req, res) => {
+  console.log(req.params);
+  let data = await products.updateOne(req.params, {
+    $set: req.body 
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`your server is running http://localhost:${PORT}`);
+});
